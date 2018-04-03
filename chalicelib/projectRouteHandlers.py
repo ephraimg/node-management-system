@@ -107,34 +107,3 @@ def handleUpdateProject(project, body):
     if 'Attributes' in response: response['Attributes'] = makeNormalDict(response['Attributes'])
     return response
 
-#######################################
-# assign one or more nodes to a project
-def handleAddProjectNode(project, body):
-    if 'nodeIDs' not in body or len(body['nodeIDs']) < 1:
-        return Response(body={'Error': 'POST request must include a list of nodeIDs.'}, status_code=400)        
-    response = client.update_item(
-        TableName='projects',
-        Key={'projectName': {'S': project}},
-        ReturnValues='UPDATED_NEW',
-        UpdateExpression='ADD assignedNodes :nodeIDs',
-        ExpressionAttributeValues={':nodeIDs': {'SS': body['nodeIDs']}}
-    )
-    # deserialize the dynamoDB results to simplify for the user 
-    if 'Attributes' in response: response['Attributes'] = makeNormalDict(response['Attributes'])
-    return {'data': response}
-
-###########################################
-# unassign one or more nodes from a project
-def handleRemoveProjectNode(project, body):
-    if 'nodeIDs' not in body or len(body['nodeIDs']) < 1:
-        return Response(body={'Error': 'DELETE request must include a list of nodeIDs.'}, status_code=400)  
-    response = client.update_item(
-        TableName='projects',
-        Key={'projectName': {'S': project}},
-        ReturnValues='UPDATED_NEW',
-        UpdateExpression='DELETE assignedNodes :nodeIDs',
-        ExpressionAttributeValues={':nodeIDs': {'SS': body['nodeIDs']}}
-    )
-    # deserialize the dynamoDB results to simplify for the user 
-    if 'Attributes' in response: response['Attributes'] = makeNormalDict(response['Attributes'])
-    return {'data': response}

@@ -11,9 +11,7 @@ client = boto3.client('dynamodb')
 # get info for all nodes
 def handleGetAllNodes():
     # get data from dynamoDB
-    response = client.scan(
-        TableName='nodes'
-    )
+    response = client.scan(TableName='nodes')
     # deserialize the dynamoDB results to simplify for the user 
     response['Items'] = [makeNormalDict(item) for item in response['Items']]
     return {'data': response}
@@ -22,10 +20,7 @@ def handleGetAllNodes():
 # get info for a particular node (by id)
 def handleGetNode(node):
     # get data from dynamoDB
-    response = client.get_item(
-        TableName='nodes',
-        Key={'nodeID': {'S': node}}
-    )
+    response = client.get_item(TableName='nodes', Key={'nodeID': {'S': node}})
     if 'Item' not in response: return Response(body={'Error': 'Unknown nodeID'}, status_code=404)
     # deserialize the dynamoDB results to simplify for the user 
     response['Item'] = makeNormalDict(response['Item'])

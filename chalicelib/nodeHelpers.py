@@ -4,6 +4,9 @@ nodeKeys = ['nodeID', 'locationXY', 'shippingStatus', 'configurationStatus']
 
 # ensure the submitted node's properties are formatted validly
 def validateNode(node, checkID):
+    # prevent setting projectName in order to use dedicated assignment logic and routes      
+    if 'projectName' in node:
+        return {'Error': 'Use /projects/{project}/nodes to assign a node to a project'}
     # check that nodeID is present and has the right format
     if checkID:
         if 'nodeID' in node:
@@ -24,10 +27,7 @@ def validateNode(node, checkID):
         if node['configurationStatus'] not in set(['Unconfigured', 'Configured', 'Working']): 
             return {'Error': 'Invalid configurationStatus'}
     # get rid of unwanted properties
-    validNode = {
-        k : v for k,v in filter(lambda t: t[0] in nodeKeys, node.iteritems())
-    }
-    return validNode 
+    return {k : v for k,v in filter(lambda t: t[0] in nodeKeys, node.iteritems())}
 
 # sublement the submitted node with any missing properties (default value 'Unknown')
 def completeNode(node):

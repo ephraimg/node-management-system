@@ -11,7 +11,7 @@
 
 This is the repository for an API that provides a management system for **nodes** and **projects**, allowing the user to create, retrieve, and update them. Nodes can also be assigned to projects or unassigned from projects.
 
-Features include batch creation, validation of user-provided keys and values, and informative error responses. Complexity is hidden from the user when possible, e.g. by serializing/deserializing objects for DynamoDB's low-level interface. Data types are chosen with response speed in mind - sets are used for assignments of nodes to projects, allowing constant time unassigning.
+Features include batch creation of nodes and projects, validation of user-provided keys and values, and informative error responses. Complexity is hidden from the user when possible, e.g. by serializing/deserializing objects for DynamoDB's low-level interface.
 
 ## Team
 
@@ -19,11 +19,11 @@ This project was created by Ephraim Glick (github.com/ephraimg).
 
 # 1. Technology used
 
-The API is implemented with AWS tools. Data is stored in DynamoDB. The code is written in Python and deployed using the Chalice microframework, which employs API Gateway and Lambda to create a serverless system.
+The API code is written in Python and deployed using the AWS Chalice microframework, which uses API Gateway and Lambda to create a serverless system. Data is stored in two DynamoDB tables, with a global secondary index on the nodes table to support the assignment and unassignment endpoints.
 
 # 2. Resources consulted
 
-Development made use of the following resources:
+In development, the following resources were consulted:
 
 - Chalice docs: http://chalice.readthedocs.io/en/latest/api.html
 - DynamoDB boto3 docs: http://boto3.readthedocs.io/en/latest/reference/services/dynamodb.html
@@ -41,7 +41,7 @@ The API is deployed on AWS with the following base URL:
 
 - https://vm443vx2w9.execute-api.us-west-1.amazonaws.com/api
 
-The API allows the user to perform three types of task (see the sections below for detailed instructions).
+The API allows the user to perform three types of task (see the sections below for the endpoints and detailed instructions).
 
     - Create, update, and retrieve nodes
     - Create, update, and retrieve projects
@@ -61,7 +61,7 @@ The project attributes that may be directly set by the user are:
     - startDate (format must be a string as in '2018-05-01')
     - endDate (format must be a string as in '2018-05-01')
 
-Each project may have nodes assigned and unassigned to it via separate dedicated endpoints. (See below.)
+Each project may have nodes assigned and unassigned to it via separate dedicated endpoints. When a node is assigned to a project, it acquires a projectName attribute.
 
 ## Security
 
@@ -73,10 +73,10 @@ To retrieve all stored nodes, send a **GET request to /nodes**.
 
 ## Adding a new node
 
-To create a node, send a **POST request to /nodes**. Your request body should contain a json representation of a list of one or more nodes, each of which has at least a nodeID attribute. Other attributes may optionally be included. Examples:
+To create a node, send a **POST request to /nodes**. Your request body should contain a json representation of a list of one or more nodes, each of which has at least a nodeID attribute. Other attributes may optionally be included. Example bodies:
 
-    - {"nodes": [{"nodeID":"W0455101"}]}
-    - {"nodes": [{"nodeID":"X0455101","shippingStatus":"Pending"}, {"nodeID":"Z0000001","locationXY":"(44.00, 71.23)"}]}
+    - {"nodes": [{"nodeID": "W0455101"}]}
+    - {"nodes": [{"nodeID": "X0455101", "shippingStatus": "Pending"}, {"nodeID": "Z0000001", "locationXY": "(44.00, 71.23)"}]}
 
 A maximum of 25 nodes may be created in a single request. However, creating one node per request is safer, as batch creation in DynamoDB does not include safegaurds against accidental overwriting of pre-existing items. (The use of a *ConditionExpression* is not supported.)
 
@@ -86,10 +86,10 @@ To retrieve a stored node, send a **GET request to /nodes/{node}**, where {node}
 
 ## Updating a node
 
-To update a node, send a **PATCH request to /nodes/{node}**, where {node} is the ID of node to update. Your request body should contain a json object with one or more pairs of node attributes and values. Updating a node's ID is not supported, so a nodeID attribute should not be included in the body. Examples:
+To update a node, send a **PATCH request to /nodes/{node}**, where {node} is the ID of node to update. Your request body should contain a json object with one or more pairs of node attributes and values. Updating a node's ID is not supported, so a nodeID attribute should not be included in the body. Example bodies:
 
-    - {"locationXY":"(23.54, 88.23)"}
-    - {"shippingStatus":"Shipped", "configurationStatus":"Configured"}
+    - {"locationXY": "(23.54, 88.23)"}
+    - {"shippingStatus": "Shipped", "configurationStatus": "Configured"}
 
 ## Retrieving details for all projects
 
@@ -97,10 +97,10 @@ To retrieve all stored projects, send a **GET request to /projects**.
 
 ## Adding a new project
 
-To create a project, send a **POST request to /projects**. Your request body should contain a json representation of a list of one or more projects, each of which has at least a projectName attribute. Other attributes may optionally be included. Examples:
+To create a project, send a **POST request to /projects**. Your request body should contain a json representation of a list of one or more projects, each of which has at least a projectName attribute. Other attributes may optionally be included. Example bodies:
 
-    - {"projects": [{"projectName":"BerkeleyFreshAirProject"}]}
-    - {"projects": [{"projectName":"ABC","customerName":"City of Oakland"}, {"projectName":"DEF","startDate":"2019-01-01"}]}
+    - {"projects": [{"projectName": "BerkeleyFreshAirProject"}]}
+    - {"projects": [{"projectName": "ABC", "customerName": "City of Oakland"}, {"projectName": "DEF", "startDate": "2019-01-01"}]}
 
 The only characters permitted in a projectName are letters, digits, and '_'. A maximum of 25 projects may be created in a single request.  However, creating one project per request is safer, as batch creation in DynamoDB does not include safegaurds against accidental overwriting of pre-existing items. (The use of a *ConditionExpression* is not supported.)
 
@@ -110,27 +110,25 @@ To retrieve a stored project, send a **GET request to /projects/{project}**, whe
 
 ## Updating a project
 
-To update a project, send a **PATCH request to /projects/{project}**, where {project} is the projectName of project to update. Your request body should contain a json object with one or more pairs of project attributes and values. Updating a project's name is not supported, so a projectName attribute should not be included in the body. Examples:
+To update a project, send a **PATCH request to /projects/{project}**, where {project} is the projectName of project to update. Your request body should contain a json object with one or more pairs of project attributes and values. Updating a project's name is not supported, so a projectName attribute should not be included in the body. Example bodies:
 
-    - {"customerName":"Liz Kong"}
-    - {"customerName":"Liz Kong", "endDate":"2011-08-11"}
+    - {"customerName": "Liz Kong"}
+    - {"customerName": "Liz Kong", "endDate": "2011-08-11"}
 
 ## Assigning nodes to a project
 
-To assign one or more nodes to a project, send a **POST request to /projects/{project}/nodes**, where {project} is the project to which the nodes will be assigned. The request body should contain a json object with a list of nodeIDs. Examples:
+To assign a node to a project, send a **POST request to /projects/{project}/nodes**, where {project} is the project to which the node will be assigned. The request body should be a json object containing a nodeID. Example body:
 
-    - {"nodeIDs": ["Z0022222"]}
-    - {"nodeIDs": ["A0000007", "A0000009", "A0000010"]}
+    - {"nodeID": "Z0022222"}
 
-After assigning nodes to a project, those assignments will be included in the details returned from GET /projects/{project}, stored in an assignedNodes attribute. Assignments to multiple projects in a single request are not supported.
+A node already assigned to a project cannot be assigned to another project unless it is first unassigned from its current one. After assigning a node to a project, that assignment will be included in the details returned from GET /nodes/{node}, stored in a projectName attribute. Assignments of multiple nodes in a single request are not supported.
 
 ## Unassigning nodes from a project
 
-To unassign one or more nodes from a project, send a **DELETE request to /projects/{project}/nodes**, where {project} is the project from which the nodes will be removed. The request body should contain a json object with a list of nodeIDs. Examples:
+To unassign a node from a project, send a **DELETE request to /projects/{project}/nodes**, where {project} is the project from which the nodes will be removed. The request body should be a json object containing a nodeID. Example:
 
-    - {"nodeIDs": ["Z0022222"]}
-    - {"nodeIDs": ["A0000007", "A0000009", "A0000010"]}
+    - {"nodeIDs": "A0000007"}
 
-Unassignments from multiple projects in a single request are not supported.
+Multiple unassignments in a single request are not supported.
 
 

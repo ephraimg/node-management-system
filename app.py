@@ -10,7 +10,7 @@ from chalicelib.nodeRouteHandlers import handleGetAllNodes, handleGetNode, handl
 from chalicelib.nodeRouteHandlers import handleCreateNode, handleUpdateNode
 from chalicelib.projectRouteHandlers import handleGetAllProjects, handleGetProject
 from chalicelib.projectRouteHandlers import handleCreateProject, handleUpdateProject
-from chalicelib.projectRouteHandlers import handleAddProjectNode, handleRemoveProjectNode
+from chalicelib.assignmentRouteHandlers import handleGetProjectNodes, handleAddProjectNode, handleRemoveProjectNode
 
 app = Chalice(app_name='clarity')
 app.debug = True
@@ -66,6 +66,11 @@ def updateProject(project):
 
 ###########################################
 # routes for assigning or unassigning nodes
+
+@app.route('/projects/{project}/nodes', methods=['GET'], api_key_required=True)
+def getProjectNodes(project):
+    body = app.current_request.json_body
+    return handleGetProjectNodes(project)
 
 @app.route('/projects/{project}/nodes', methods=['POST'], api_key_required=True)
 def addProjectNode(project):

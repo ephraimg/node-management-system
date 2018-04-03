@@ -1,6 +1,6 @@
 import re
 
-projectKeys = ['projectName', 'customerName', 'startDate', 'endDate', 'assignedNodes']
+projectKeys = ['projectName', 'customerName', 'startDate', 'endDate'] #, 'assignedNodes']
 
 # ensure the submitted node's properties, if present, are valid
 def validateProject(project, checkName):
@@ -24,20 +24,17 @@ def validateProject(project, checkName):
         if not re.match('^\d{4}\-\d{2}\-\d{2}$', project['endDate']):
             return {'Error': 'Invalid endDate format'}
     # check that assignedNodes is a list       
-    if 'assignedNodes' in project:
-        if not isinstance(project['assignedNodes'], list) or len(project['assignedNodes']) < 1:
-            return {'Error': 'Project\'s assignedNodes must be a non-empty list'}
-        else:
-            project['assignedNodes'] = set(project['assignedNodes'])      
+    # if 'assignedNodes' in project:
+    #     if not isinstance(project['assignedNodes'], list) or len(project['assignedNodes']) < 1:
+    #         return {'Error': 'Project\'s assignedNodes must be a non-empty list'}
+    #     else:
+    #         project['assignedNodes'] = set(project['assignedNodes'])      
     # get rid of unwanted properties
-    validProject = {
-        k : v for k,v in filter(lambda t: t[0] in projectKeys, project.iteritems())
-    }
-    return validProject
+    return {k : v for k,v in filter(lambda t: t[0] in projectKeys, project.iteritems())}
 
 # sublement the submitted project with any missing properties (default value 'Unknown' or [])
 def completeProject(project):
     for key in projectKeys:
-        if key != 'projectName' and key != 'assignedNodes':
+        if key != 'projectName': # and key != 'assignedNodes':
             project[key] = project.get(key, None)
     return project
