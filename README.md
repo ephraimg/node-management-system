@@ -49,7 +49,7 @@ The API allows the user to perform three types of task.
 
 The node attributes that may be directly set by the user are:
 
-    - nodeID (format must be a string of one letter followed by nine digits, e.g. 'W000455101')
+    - nodeID (format must be a string of one letter followed by seven digits, e.g. 'W0004551')
     - location (format must be a string of a simplified latitude/longitude in parens, e.g. '(24.90, 23.09)')
     - shippingStatus (must be one of 'Pending', 'Shipping', 'Shipped')
     - configurationStatus (must be one of 'Unconfigured', 'Configured', 'Working')
@@ -130,7 +130,7 @@ To unassign one or more nodes from a project, send a DELETE request to /projects
 
     - {"nodeIDs": ["Z000022222"]}
     - {"nodeIDs": ["A000000007", "A000000009", "A000000010"]}
-    
+
 Unassignments from multiple projects in a single request are not supported.
 
 
