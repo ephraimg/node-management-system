@@ -50,7 +50,7 @@ The API allows the user to perform three types of task.
 The node attributes that may be directly set by the user are:
 
     - nodeID (format must be a string of one letter followed by seven digits, e.g. 'W0004551')
-    - location (format must be a string of a simplified latitude/longitude in parens, e.g. '(24.90, 23.09)')
+    - locationXY (format must be a string of a simplified latitude/longitude in parens, e.g. '(24.90, 23.09)')
     - shippingStatus (must be one of 'Pending', 'Shipping', 'Shipped')
     - configurationStatus (must be one of 'Unconfigured', 'Configured', 'Working')
 
@@ -76,7 +76,7 @@ To retrieve all stored nodes, send a GET request to /nodes.
 To create a node, send a POST request to /nodes. Your request body should contain a json representation of a list of one or more nodes, each of which has at least a nodeID attribute. Other attributes may optionally be included. Examples:
 
     - {"nodes": [{"nodeID":"W000455101"}]}
-    - {"nodes": [{"nodeID":"X000455101","shippingStatus":"Pending"}, {"nodeID":"Z000000001","location":"(44.00, 71.23)"}]}
+    - {"nodes": [{"nodeID":"X000455101","shippingStatus":"Pending"}, {"nodeID":"Z000000001","locationXY":"(44.00, 71.23)"}]}
 
 A maximum of 25 nodes may be created in a single request.
 
@@ -88,7 +88,7 @@ To retrieve a stored node, send a GET request to /nodes/{node}, where {node} is 
 
 To update a node, send a PATCH request to /nodes/{node}, where {node} is the ID of node to update. Your request body should contain a json object with one or more pairs of node attributes and values. Updating a node's ID is not supported, so a nodeID attribute should not be included in the body. Examples:
 
-    - {"location":"(23.54, 88.23)"}
+    - {"locationXY":"(23.54, 88.23)"}
     - {"shippingStatus":"Shipped", "configurationStatus":"Configured"}
 
 ## Retrieving details for all projects
@@ -112,8 +112,8 @@ To retrieve a stored project, send a GET request to /projects/{project}, where {
 
 To update a project, send a PATCH request to /projects/{project}, where {project} is the projectName of project to update. Your request body should contain a json object with one or more pairs of project attributes and values. Updating a project's name is not supported, so a projectName attribute should not be included in the body. Examples:
 
-    - {"location":"(23.54, 88.23)"}
-    - {"shippingStatus":"Shipped", "configurationStatus":"Configured"}
+    - {"customerName":"Liz Kong"}
+    - {"customerName":"Liz Kong", "endDate":"2011-08-11"}
 
 ## Assigning nodes to a project
 
