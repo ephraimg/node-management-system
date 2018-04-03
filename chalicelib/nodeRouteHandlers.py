@@ -53,11 +53,14 @@ def handleCreateNode(body):
         node = completeNode(validateNode(body['nodes'][0], True))
         if 'Error' in node: return Response(body={'Error': node['Error']}, status_code=400)
         # send data to dynamoDB
-        response = client.put_item(
-            TableName='nodes',
-            Item=makeLowLevelDict(node),
-            ConditionExpression='attribute_not_exists(nodeID)',
-        )
+        try:
+            response = client.put_item(
+                TableName='nodes',
+                Item=makeLowLevelDict(node),
+                ConditionExpression='attribute_not_exists(nodeID)',
+            )
+        except:
+            return Response(body={'Error': 'NodeID already exists'}, status_code=403)
     # use Response to change status code to 201 from default 200    
     return Response(
         # no need to deserialize, as only metadata is returned
@@ -75,16 +78,16 @@ def handleUpdateNode(node, body):
             return Response(body={'Error': 'A nodeID cannot be changed'}, status_code=403)
         else:
             del body['nodeID']
-    # if there are no keys left in node, reject request
-    if len(body.keys()) == 0:
-        return Response(body={'Error': 'Request must include a valid update'}, status_code=400)
     # check if the node has valid properties / values
     valNode = validateNode(body, False)
     if 'Error' in valNode: return Response(body=valNode, status_code=400)
+    # if there are no keys left in node, reject request
+    if len(body.keys()) == 0:
+        return Response(body={'Error': 'Request must include a valid update'}, status_code=400)
     valNode = makeLowLevelDict(valNode)
     # set up some storage to help with the dynamoDB operation
     updates = []
-    expAttValues = {}
+    expAttValues = {':nodeID': {'S': node}}
     # form update expression for dynamoDB operation
     updateExpr = 'SET '
     for key in valNode:
@@ -92,15 +95,19 @@ def handleUpdateNode(node, body):
         expAttValues[':' + key] = valNode[key]
     updateExpr += (', ').join(updates)
     # get data from dynamoDB
-    response = client.update_item(
-        TableName='nodes',
-        Key={'nodeID': {'S': node}},
-        ReturnValues='UPDATED_NEW',
-        ReturnConsumedCapacity='NONE',
-        ReturnItemCollectionMetrics='SIZE',
-        UpdateExpression=updateExpr,
-        ExpressionAttributeValues=expAttValues
-    )
-    # deserialize the dynamoDB results to simplify for the user 
-    response['Attributes'] = makeNormalDict(response['Attributes'])
+    try:
+        response = client.update_item(
+            TableName='nodes',
+            Key={'nodeID': {'S': node}},
+            ReturnValues='UPDATED_NEW',
+            ReturnConsumedCapacity='NONE',
+            ReturnItemCollectionMetrics='SIZE',
+            UpdateExpression=updateExpr,
+            ConditionExpression='nodeID = :nodeID',
+            ExpressionAttributeValues=expAttValues
+        )
+    except:
+        return Response(body={'Error': 'Requested node does not exist'}, status_code=404)
+    # deserialize the dynamoDB results to simplify for the user
+    if 'Attributes' in response: response['Attributes'] = makeNormalDict(response['Attributes'])
     return response
