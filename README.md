@@ -115,6 +115,10 @@ To update a project, send a **PATCH request to /projects/{project}**, where {pro
 - {"customerName": "Liz Kong"}
 - {"customerName": "Liz Kong", "endDate": "2011-08-11"}
 
+## Get details of all nodes assigned to a project
+
+To retrieve all of a project's nodes, send a **GET request to /projects/{project}/nodes**, where {project} is the project whose nodes will be retrieved.
+
 ## Assigning nodes to a project
 
 To assign a node to a project, send a **POST request to /projects/{project}/nodes**, where {project} is the project to which the node will be assigned. The request body should be a json object containing a nodeID. Example body:
