@@ -33,5 +33,5 @@ def validateNode(node, checkID):
 def completeNode(node):
     for key in nodeKeys:
         if key != 'nodeID':
-            node[key] = node.get(key, 'Unknown')
+            node[key] = node.get(key, None)
     return node

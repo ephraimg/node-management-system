@@ -42,11 +42,11 @@ def handleCreateNode(body):
     if len(body['nodes']) > 1:
         nodes = []
         for node in body['nodes']:
-            valNode = validateNode(x, True)
+            valNode = validateNode(node, True)
             if 'Error' in valNode: return Response(body={'Error': valNode['Error']}, status_code=400)
             valNode = makeLowLevelDict(completeNode(valNode))
             nodes.append(valNode)
-        requests = list(map(lambda x: {'PutRequest': {'Item': valNode}}, nodes))
+        requests = list(map(lambda x: {'PutRequest': {'Item': x}}, nodes))
         response = client.batch_write_item(RequestItems={'nodes': requests})
     else:
         # treat this case specially b/c put_item will retry failed puts, allows anti-overwrite

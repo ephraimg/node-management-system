@@ -43,11 +43,11 @@ def handleCreateProject(body):
     if len(body['projects']) > 1:
         projects = []
         for project in body['projects']:
-            valProject = validateProject(x, True)
+            valProject = validateProject(project, True)
             if 'Error' in valProject: return Response(body={'Error': valProject['Error']}, status_code=400)   
             valProject = makeLowLevelDict(completeProject(valProject))
             projects.append(valProject)
-        requests = list(map(lambda x: {'PutRequest': {'Item': valProject}}, projects))
+        requests = list(map(lambda x: {'PutRequest': {'Item': x}}, projects))
         response = client.batch_write_item(RequestItems={'projects': requests})
     else:
         # treat this case specially b/c put_item will retry failed puts, allows anti-overwrite
