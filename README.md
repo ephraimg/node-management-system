@@ -36,8 +36,7 @@ Development made use of the following resources:
 
 ## Overview
 
-The API is deployed on AWS with the following base URL:
-    - https://vm443vx2w9.execute-api.us-west-1.amazonaws.com/api
+The API is deployed on AWS with the following base URL: https://vm443vx2w9.execute-api.us-west-1.amazonaws.com/api
 
 The API allows the user to perform three types of task.
     - Create, update, and retrieve nodes
@@ -61,7 +60,6 @@ Each project may have nodes assigned and unassigned to it via separate dedicated
 ## Security
 
 The API is protected with a key. All requests must include an X-API-Key header. 
-    - X-API-Key: FILL_THIS_IN
 
 ## Retrieving details for all nodes
 
