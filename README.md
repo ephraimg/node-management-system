@@ -78,7 +78,7 @@ To create a node, send a **POST request to /nodes**. Your request body should co
     - {"nodes": [{"nodeID":"W0455101"}]}
     - {"nodes": [{"nodeID":"X0455101","shippingStatus":"Pending"}, {"nodeID":"Z0000001","locationXY":"(44.00, 71.23)"}]}
 
-A maximum of 25 nodes may be created in a single request.
+A maximum of 25 nodes may be created in a single request. However, creating one node per request is safer, as batch creation in DynamoDB does not include safegaurds against accidental overwriting of pre-existing items. (The use of a __ConditionExpression__ is not supported.)
 
 ## Retrieving details for a node
 
@@ -102,7 +102,7 @@ To create a project, send a **POST request to /projects**. Your request body sho
     - {"projects": [{"projectName":"BerkeleyFreshAirProject"}]}
     - {"projects": [{"projectName":"ABC","customerName":"City of Oakland"}, {"projectName":"DEF","startDate":"2019-01-01"}]}
 
-The only characters permitted in a projectName are letters, digits, and '_'. A maximum of 25 projects may be created in a single request.
+The only characters permitted in a projectName are letters, digits, and '_'. A maximum of 25 projects may be created in a single request.  However, creating one project per request is safer, as batch creation in DynamoDB does not include safegaurds against accidental overwriting of pre-existing items. (The use of a __ConditionExpression__ is not supported.)
 
 ## Retrieving details for a project
 
