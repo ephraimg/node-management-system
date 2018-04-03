@@ -41,7 +41,7 @@ The API is deployed on AWS with the following base URL:
 
 - https://vm443vx2w9.execute-api.us-west-1.amazonaws.com/api
 
-The API allows the user to perform three types of task.
+The API allows the user to perform three types of task (see the sections below for detailed instructions).
 
     - Create, update, and retrieve nodes
     - Create, update, and retrieve projects
@@ -69,7 +69,7 @@ The API is protected with a key. All requests must include an X-API-Key header.
 
 ## Retrieving details for all nodes
 
-To retrieve all stored nodes, send a GET request to /nodes.
+To retrieve all stored nodes, send a **GET request to /nodes**.
 
 ## Adding a new node
 
