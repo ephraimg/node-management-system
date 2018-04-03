@@ -1,6 +1,6 @@
 import re
 
-nodeKeys = ['nodeID', 'location', 'shippingStatus', 'configurationStatus']
+nodeKeys = ['nodeID', 'locationXY', 'shippingStatus', 'configurationStatus']
 
 # ensure the submitted node's properties are formatted validly
 def validateNode(node, checkID):
@@ -11,10 +11,10 @@ def validateNode(node, checkID):
                 return {'Error': 'Invalid nodeID'}
         else:
             return {'Error': 'Missing nodeID'}           
-    # check that location has the right format (simplified lat/long)         
-    if 'location' in node:
-        if not re.match('\(\d+.\d+, ?\d+.\d+\)', node['location']):
-            return {'Error': 'Invalid location'}
+    # check that locationXY has the right format (simplified lat/long)         
+    if 'locationXY' in node:
+        if not re.match('\(\d+.\d+, ?\d+.\d+\)', node['locationXY']):
+            return {'Error': 'Invalid locationXY'}
     # check that shippingStatus is not outside allowed set of options       
     if 'shippingStatus' in node:
         if node['shippingStatus'] not in set(['Pending', 'Shipping', 'Shipped']): 
