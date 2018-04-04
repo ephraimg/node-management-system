@@ -9,6 +9,7 @@ client = boto3.client('dynamodb')
 
 ##############################
 # get details for all projects
+
 def handleGetAllProjects():
     # get data from dynamoDB
     response = client.scan(TableName='projects')
@@ -18,6 +19,7 @@ def handleGetAllProjects():
 
 ############################################
 # get details for a specific project by name
+
 def handleGetProject(project):
     # get data from dynamoDB
     response = client.get_item(TableName='projects', Key={'projectName': {'S': project}})
@@ -29,12 +31,16 @@ def handleGetProject(project):
 
 ####################
 # post a new project
+
 def handleCreateProject(body):
     response = {}
+    # make sure the user included nodes to create
     if 'projects' not in body or len(body['projects']) < 1:
         return Response(body={'Error': 'Request must include a list of projects'}, status_code=400)     
+    # creating > 25 nodes isn't supported yet, as it requires more complex interaction with db
     if len(body['projects']) > 25: 
         return Response(body={'Error': 'Request cannot include more than 25 projects'}, status_code=400)        
+    # if the user included multiple nodes, use batch_write_item
     if len(body['projects']) > 1:
         projects = []
         for project in body['projects']:
@@ -45,14 +51,15 @@ def handleCreateProject(body):
         requests = list(map(lambda x: {'PutRequest': {'Item': x}}, projects))
         response = client.batch_write_item(RequestItems={'projects': requests})
     else:
-        # treat this case specially b/c put_item will retry failed puts, allows anti-overwrite
+    #if the user only included one item, use put_item (it retries failed put, allows anti-overwrite)
         project = completeProject(validateProject(body['projects'][0], True))
         if 'Error' in project: return Response(body={'Error': project['Error']}, status_code=400)  
+        # send data to dynamoDB
         try:
             response = client.put_item(
                 TableName='projects',
                 Item=makeLowLevelDict(project),
-                ConditionExpression='attribute_not_exists(projectName)',
+                ConditionExpression='attribute_not_exists(projectName)'
             )
         except:
             return Response(body={'Error': 'ProjectName already exists'}, status_code=403)
@@ -66,6 +73,7 @@ def handleCreateProject(body):
 
 #############################################
 # update a project's details (by projectName)
+
 def handleUpdateProject(project, body):
     # user should not include a projectName, especially different one from project!
     if 'projectName' in body:

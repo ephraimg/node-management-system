@@ -9,6 +9,7 @@ client = boto3.client('dynamodb')
 
 ########################
 # get info for all nodes
+
 def handleGetAllNodes():
     # get data from dynamoDB
     response = client.scan(TableName='nodes')
@@ -18,6 +19,7 @@ def handleGetAllNodes():
 
 ########################################
 # get info for a particular node (by id)
+
 def handleGetNode(node):
     # get data from dynamoDB
     response = client.get_item(TableName='nodes', Key={'nodeID': {'S': node}})
@@ -28,12 +30,16 @@ def handleGetNode(node):
 
 ##########################
 # create new node or nodes
+
 def handleCreateNode(body):
     response = {}
+    # make sure the user included nodes to create
     if 'nodes' not in body or len(body['nodes']) < 1: 
         return Response(body={'Error': 'Request must include a list of nodes'}, status_code=400)
+    # creating > 25 nodes isn't supported yet, as it requires more complex interaction with db
     if len(body['nodes']) > 25: 
         return Response(body={'Error': 'Request cannot include more than 25 nodes'}, status_code=400)
+    # if the user included multiple nodes, use batch_write_item
     if len(body['nodes']) > 1:
         nodes = []
         for node in body['nodes']:
@@ -44,7 +50,7 @@ def handleCreateNode(body):
         requests = list(map(lambda x: {'PutRequest': {'Item': x}}, nodes))
         response = client.batch_write_item(RequestItems={'nodes': requests})
     else:
-        # treat this case specially b/c put_item will retry failed puts, allows anti-overwrite
+    #if the user only included one item, use put_item (it retries failed put, allows anti-overwrite)
         node = completeNode(validateNode(body['nodes'][0], True))
         if 'Error' in node: return Response(body={'Error': node['Error']}, status_code=400)
         # send data to dynamoDB
@@ -66,6 +72,7 @@ def handleCreateNode(body):
 
 #########################
 # update a node's details
+
 def handleUpdateNode(node, body):
     # user should not include nodeID, especially a different one from node!
     if 'nodeID' in body:
